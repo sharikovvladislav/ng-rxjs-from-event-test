@@ -1,5 +1,6 @@
 import { TestBed, async } from '@angular/core/testing';
 import { AppComponent } from './app.component';
+import { By } from '@angular/platform-browser';
 describe('AppComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
@@ -8,20 +9,43 @@ describe('AppComponent', () => {
       ],
     }).compileComponents();
   }));
-  it('should create the app', async(() => {
+  it('should work with rxjs fromEvent subscription', async(() => {
     const fixture = TestBed.createComponent(AppComponent);
-    const app = fixture.debugElement.componentInstance;
-    expect(app).toBeTruthy();
+    const de = fixture.debugElement;
+    const component = fixture.componentInstance;
+
+    expect(component).toBeTruthy();
+
+    component.createKeydownSubscription();
+
+    spyOn(component, 'keydownHandler').and.callThrough();
+
+    de.query(By.css('input')).triggerEventHandler('keydown', {
+      keyCode: 13
+    });
+
+    expect(component.keydownHandler).toHaveBeenCalled();
+
+    // extra expect to show the problem
+    expect(de.query(By.css('input')).listeners.length).toBe(1);
   }));
-  it(`should have as title 'app'`, async(() => {
+
+  it(`should work with simple addEventListener`, async(() => {
     const fixture = TestBed.createComponent(AppComponent);
-    const app = fixture.debugElement.componentInstance;
-    expect(app.title).toEqual('app');
-  }));
-  it('should render title in a h1 tag', async(() => {
-    const fixture = TestBed.createComponent(AppComponent);
-    fixture.detectChanges();
-    const compiled = fixture.debugElement.nativeElement;
-    expect(compiled.querySelector('h1').textContent).toContain('Welcome to app!');
+    const de = fixture.debugElement;
+    const component = fixture.componentInstance;
+
+    expect(component).toBeTruthy();
+
+    component.createClickListener();
+
+    spyOn(component, 'clickHandler').and.callThrough();
+
+    de.query(By.css('input')).triggerEventHandler('click', null);
+
+    expect(component.clickHandler).toHaveBeenCalled();
+
+    // extra expect to show the problem
+    expect(de.query(By.css('input')).listeners.length).toBe(1);
   }));
 });
